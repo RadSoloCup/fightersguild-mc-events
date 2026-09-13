@@ -1,0 +1,19 @@
+{
+  "name": "fightersguild-mc-events",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Seasonal battlepass live-service announcements for the Fighters Guild Minecraft server (Fluxer + Portal events)",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "once": "RUN_ONCE=1 node src/index.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "croner": "^9.0.0"
+  },
+  "license": "AGPL-3.0-or-later"
+}
