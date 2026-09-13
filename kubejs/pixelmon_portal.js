@@ -30,9 +30,9 @@ var PORTAL_Y = 69
 var PORTAL_Z = 73
 var PORTAL_RADIUS = 3
 
-var RETURN_X = 0
-var RETURN_Y = 101
-var RETURN_Z = 0
+var RETURN_X = 602
+var RETURN_Y = 67
+var RETURN_Z = 792
 
 function pPlayerName(p) {
   return p.getUsername ? p.getUsername() : p.getName().getString()
@@ -87,11 +87,23 @@ var pFramesBuilt = false
 function pEnsureFrames(server) {
   if (pFramesBuilt) return
   pFramesBuilt = true
+  // Force-load both frame locations permanently — a `fill` on an unloaded
+  // chunk fails silently ("that position is not loaded"), which is exactly
+  // what happened building this frame the first time nobody was nearby.
+  // Force-loading also means the frame (and its particle swirl) stays
+  // present/visible even when no one is near it.
+  try { server.runCommandSilent('execute in ' + OVERWORLD_DIM + ' run forceload add ' + (PORTAL_X - 5) + ' ' + (PORTAL_Z - 5) + ' ' + (PORTAL_X + 5) + ' ' + (PORTAL_Z + 5)) } catch (e) { pLog('overworld forceload failed: ' + e) }
+  try { server.runCommandSilent('execute in ' + PIXELMON_DIM + ' run forceload add ' + (RETURN_X - 5) + ' ' + (RETURN_Z - 5) + ' ' + (RETURN_X + 5) + ' ' + (RETURN_Z + 5)) } catch (e) { pLog('pixelmon world forceload failed: ' + e) }
   try {
-    // Small platform under the return frame — the Pixelmon world's terrain
-    // there is unknown/unexplored, so this guarantees solid, safe ground.
-    server.runCommandSilent('execute in ' + PIXELMON_DIM + ' run fill ' + (RETURN_X - 3) + ' ' + (RETURN_Y - 1) + ' ' + (RETURN_Z - 3) + ' ' + (RETURN_X + 3) + ' ' + (RETURN_Y - 1) + ' ' + (RETURN_Z + 3) + ' minecraft:polished_blackstone')
-  } catch (e) { pLog('return platform build failed: ' + e) }
+    // Clear the old return frame + platform from before the portal moved —
+    // (0, 101, 0) was only ever an artificial floating platform, safe to
+    // fully remove. Also force-load it just long enough to clean it up.
+    server.runCommandSilent('execute in ' + PIXELMON_DIM + ' run forceload add -4 -4 4 4')
+    server.runCommandSilent('execute in ' + PIXELMON_DIM + ' run fill -4 96 -4 4 105 4 minecraft:air')
+    server.runCommandSilent('execute in ' + PIXELMON_DIM + ' run forceload remove -4 -4 4 4')
+  } catch (e) { pLog('old return frame cleanup failed: ' + e) }
+  // (602, 67, 792) is natural ground (verified: MOTION_BLOCKING height = 66
+  // there), so no artificial platform needed this time — just the frame.
   pBuildFrame(server, OVERWORLD_DIM, PORTAL_X - 1, PORTAL_Y - 1, PORTAL_Z)
   pBuildFrame(server, PIXELMON_DIM, RETURN_X - 1, RETURN_Y - 1, RETURN_Z)
   pLog('built portal frames at overworld ' + PORTAL_X + ',' + PORTAL_Y + ',' + PORTAL_Z + ' and pixelmon world ' + RETURN_X + ',' + RETURN_Y + ',' + RETURN_Z)
