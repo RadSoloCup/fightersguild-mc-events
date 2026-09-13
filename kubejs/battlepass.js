@@ -25,15 +25,25 @@ function bpLog(msg) { console.log(BP_LOG_PREFIX + msg) }
 //
 // A season can either be a single theme for its whole 3 months (just set
 // name/emoji/color at the top level), or split into two `phases` (a day
-// range each, via phaseSplitDay) with their own name/emoji/color and
-// optional `horde` (periodic mob wave + day-before warning), `snow`
-// (periodic weather trigger), and `decor` (tagged item_display entities
-// scattered near online players, auto-removed the moment the phase ends —
-// real block placement was considered and rejected: there's no sandboxed
-// way to query terrain height from here, and tracking placed block coords
-// in memory wouldn't survive a restart, so decor uses entities instead,
-// which persist correctly through restarts and can never destroy a
-// player's build).
+// range each, via phaseSplitDay) with their own name/emoji/color and:
+//   - `horde` { everyDays, spawnMultiplier } — every `everyDays` in-game
+//     days, every NATURALLY-spawning zombie gets cloned in place
+//     `spawnMultiplier`x (see the EntityEvents.spawned hook below), rather
+//     than /summon-ing new zombies at chosen coordinates near players — the
+//     latter risked landing inside someone's claimed base. Cloning at a
+//     spawn vanilla/FTBChunks already approved means the extras can never
+//     appear anywhere a normal zombie couldn't have. Warns everyone with a
+//     title card the day before.
+//   - `snow` { everyDays, durationTicks } — periodic weather trigger
+//     (renders as snow only in cold biomes, rain elsewhere; vanilla has no
+//     "force snow everywhere" override).
+//   - `decor` { tag, items } — tagged item_display entities scattered near
+//     online players, auto-removed the moment the phase ends. Real block
+//     placement was considered and rejected: there's no sandboxed way to
+//     query terrain height from here, and tracking placed block coords in
+//     memory wouldn't survive a restart, so decor uses entities instead,
+//     which persist correctly through restarts and can never destroy a
+//     player's build.
 var BP =
 {
   "levelsPerSeason": 30,
@@ -49,7 +59,7 @@ var BP =
           "name": "Night of the Living Dead",
           "emoji": "🎃",
           "color": "gold",
-          "horde": { "everyDays": 7, "countPerPlayer": 8 },
+          "horde": { "everyDays": 7, "spawnMultiplier": 12 },
           "decor": {
             "tag": "bp_halloween_decor",
             "items": ["minecraft:carved_pumpkin", "minecraft:jack_o_lantern", "minecraft:pumpkin"]
@@ -325,46 +335,22 @@ function bpRunGive(server, playerName, commands) {
   }
 }
 
-// ── tab list (NOT sidebar — keeps the main screen clear) ────────────────────
-var bpLastScoreboardPhaseGlobalKey = null
-function bpEnsureScoreboard(server, season) {
-  try { server.runCommandSilent('scoreboard objectives add bp_level dummy {"text":""}') } catch (e) { /* already exists */ }
-  if (bpLastScoreboardPhaseGlobalKey === season.phaseGlobalKey) return
-  bpLastScoreboardPhaseGlobalKey = season.phaseGlobalKey
-  try {
-    var title = season.phase.def.emoji + ' ' + season.phase.def.name + ' (Lv.)'
-    server.runCommandSilent('scoreboard objectives modify bp_level displayname {"text":"' + title + '"}')
-    server.runCommandSilent('scoreboard objectives setdisplay list bp_level') // tab list, not sidebar
-  } catch (e) { bpLog('scoreboard setup failed: ' + e) }
+// ── NO persistent HUD element at all — text only. Progress shows as an
+// actionbar line (plain text above the hotbar, fades on its own after a
+// couple seconds — not a widget, nothing left behind) whenever XP is
+// gained, plus the usual chat/title messages on login and level-up. ───────
+function bpProgressBarText(pct, width) {
+  var filled = Math.round(pct * width)
+  var bar = ''
+  for (var i = 0; i < width; i++) bar += i < filled ? '▓' : '░'
+  return bar
 }
-function bpUpdateScore(server, playerName, level) {
-  try { server.runCommandSilent('scoreboard players set ' + playerName + ' bp_level ' + level) }
-  catch (e) { bpLog('scoreboard update failed: ' + e) }
-}
-
-// ── transient boss-bar progress meter (only shown while actively gaining XP,
-// auto-hides ~5-10s after — a real progress bar without a permanent HUD) ────
-function bpBossBarId(playerName) {
-  return 'minecraft:bp_' + playerName.toLowerCase().replace(/[^a-z0-9_.]/g, '_')
-}
-var bpBarVisible = {}
-function bpShowProgressBar(server, playerName, phase, level, xpIntoLevel, xpPerLevel) {
-  var id = bpBossBarId(playerName)
+function bpShowProgress(server, playerName, phase, level, xpIntoLevel, xpPerLevel) {
   var pct = Math.max(0, Math.min(1, xpIntoLevel / xpPerLevel))
-  try { server.runCommandSilent('bossbar add ' + id + ' {"text":""}') } catch (e) { /* already exists */ }
-  try {
-    server.runCommandSilent('bossbar set ' + id + ' players ' + playerName)
-    server.runCommandSilent('bossbar set ' + id + ' name {"text":"' + phase.def.emoji + ' ' + phase.def.name + ' — Lv.' + level + ' (' + xpIntoLevel + '/' + xpPerLevel + ')"}')
-    server.runCommandSilent('bossbar set ' + id + ' max 1000')
-    server.runCommandSilent('bossbar set ' + id + ' value ' + Math.round(pct * 1000))
-    server.runCommandSilent('bossbar set ' + id + ' visible true')
-  } catch (e) { bpLog('bossbar update failed: ' + e) }
-}
-function bpHideProgressBar(server, playerName) {
-  try { server.runCommandSilent('bossbar set ' + bpBossBarId(playerName) + ' visible false') } catch (e) {}
-}
-function bpRemoveProgressBar(server, playerName) {
-  try { server.runCommandSilent('bossbar remove ' + bpBossBarId(playerName)) } catch (e) {}
+  var bar = bpProgressBarText(pct, 20)
+  var text = phase.def.emoji + ' Lv.' + level + ' ' + bar + ' ' + xpIntoLevel + '/' + xpPerLevel
+  try { server.runCommandSilent('title ' + playerName + ' actionbar {"text":"' + text + '"}') }
+  catch (e) { bpLog('actionbar progress failed: ' + e) }
 }
 
 function bpAnnounceLevelUp(server, p, playerName, season, newLevel) {
@@ -400,14 +386,20 @@ function bpNextRewardPreview(server, playerName, season, level) {
   catch (e) { bpLog('next-reward preview failed: ' + e) }
 }
 
-// ── Halloween horde: every `everyDays` in-game days, only while players are
-// online; warns everyone the day before ─────────────────────────────────────
+// ── Halloween horde: every `everyDays` in-game days, warns everyone the day
+// before. Doesn't /summon anything near players (that risked landing inside
+// claimed/protected land) — instead it amplifies zombies the game *already*
+// decided to naturally spawn (see the EntityEvents.spawned hook below), so
+// every extra zombie only ever appears somewhere vanilla/FTBChunks already
+// approved a spawn, i.e. never inside a player's claim. ────────────────────
 var bpLastHordeWarnDay = -1
-var bpLastHordeDay = -1
+var bpLastHordeAnnounceDay = -1
+var bpHordeActiveDay = -1 // dayOfSeason for which the spawn-amplifier is live; -1 = off
 function bpCheckHorde(server, season) {
   var horde = season.phase.def.horde
-  if (!horde) return
   var d = season.dayOfSeason
+
+  if (!horde) { bpHordeActiveDay = -1; return }
   var every = horde.everyDays
 
   if (d > 0 && (d + 1) % every === 0 && bpLastHordeWarnDay !== d) {
@@ -419,30 +411,50 @@ function bpCheckHorde(server, season) {
     } catch (e) { bpLog('horde warning failed: ' + e) }
   }
 
-  if (d > 0 && d % every === 0 && bpLastHordeDay !== d) {
-    var onlinePlayers = server.players
-    if (onlinePlayers.length === 0) return // don't spawn a horde for nobody
-    bpLastHordeDay = d
-    var count = horde.countPerPlayer || 8
-    var i, j
-    for (i = 0; i < onlinePlayers.length; i++) {
-      var name = bpPlayerName(onlinePlayers[i])
-      for (j = 0; j < count; j++) {
-        var dx = Math.floor(Math.random() * 30) - 15
-        var dz = Math.floor(Math.random() * 30) - 15
-        if (dx > -5 && dx < 5) dx = dx < 0 ? -5 : 5
-        if (dz > -5 && dz < 5) dz = dz < 0 ? -5 : 5
-        try { server.runCommandSilent('execute at ' + name + ' run summon minecraft:zombie ~' + dx + ' ~ ~' + dz) }
-        catch (e) { bpLog('horde spawn failed: ' + e) }
-      }
+  if (d > 0 && d % every === 0) {
+    bpHordeActiveDay = d
+    if (bpLastHordeAnnounceDay !== d) {
+      bpLastHordeAnnounceDay = d
+      try {
+        server.runCommandSilent('title @a title {"text":"🧟 THE HORDE IS HERE","color":"dark_red"}')
+        server.runCommandSilent('playsound minecraft:entity.zombie.ambient master @a')
+      } catch (e) {}
+      bpLog('horde night active, day ' + d + ' (spawn multiplier ' + horde.spawnMultiplier + 'x)')
     }
-    try {
-      server.runCommandSilent('title @a title {"text":"🧟 THE HORDE IS HERE","color":"dark_red"}')
-      server.runCommandSilent('playsound minecraft:entity.zombie.ambient master @a')
-    } catch (e) {}
-    bpLog('spawned horde for day ' + d)
+  } else {
+    bpHordeActiveDay = -1
   }
 }
+
+// Every NATURAL zombie spawn (never our own clones, never player-summoned —
+// gated on getSpawnType() === 'NATURAL') gets cloned in place a few extra
+// times while the horde is active, turning the night's normal zombie count
+// into spawnMultiplier x that, without ever picking a spawn point ourselves.
+EntityEvents.spawned(event => {
+  if (!BP || bpHordeActiveDay < 0) return
+  var e = event.entity
+  if (!e || e.type !== 'minecraft:zombie') return
+  var spawnType = null
+  try { spawnType = e.getSpawnType() } catch (err) { return }
+  if (spawnType !== 'NATURAL') return
+
+  var season = bpCurrentSeason()
+  if (!season || season.dayOfSeason !== bpHordeActiveDay) return
+  var horde = season.phase.def.horde
+  if (!horde) return
+  var extra = (horde.spawnMultiplier || 1) - 1
+  if (extra <= 0) return
+
+  var server = event.server
+  var x = e.getX(), y = e.getY(), z = e.getZ()
+  var i
+  for (i = 0; i < extra; i++) {
+    var dx = (Math.random() * 4 - 2).toFixed(1)
+    var dz = (Math.random() * 4 - 2).toFixed(1)
+    try { server.runCommandSilent('execute positioned ' + x + ' ' + y + ' ' + z + ' run summon minecraft:zombie ~' + dx + ' ~ ~' + dz) }
+    catch (e2) { bpLog('horde amplify failed: ' + e2) }
+  }
+})
 
 // ── Christmas snow: periodic weather trigger (renders as snow in cold biomes,
 // rain elsewhere — vanilla has no "force snow everywhere" regardless of
@@ -510,8 +522,6 @@ PlayerEvents.loggedIn(event => {
   var name = bpPlayerName(p)
   var server = event.server
 
-  bpEnsureScoreboard(server, season)
-
   var state = bpGetState(p)
   var isNewSeasonForPlayer = state.seasonKey !== season.key
 
@@ -538,7 +548,6 @@ PlayerEvents.loggedIn(event => {
   }
 
   bpSaveState(p, state.tag, state)
-  bpUpdateScore(server, name, state.level)
 
   try {
     var xpPerLevel = BP.xpPerLevel
@@ -547,12 +556,6 @@ PlayerEvents.loggedIn(event => {
       ' (' + needed + ' XP to next level)')
   } catch (e) {}
   bpNextRewardPreview(server, name, season, state.level)
-})
-
-PlayerEvents.loggedOut(event => {
-  var name = bpPlayerName(event.player)
-  try { bpRemoveProgressBar(event.server, name) } catch (e) {}
-  delete bpBarVisible[name]
 })
 
 // ── periodic sweep: XP sync + level-ups, world event checks ─────────────────
@@ -597,18 +600,11 @@ ServerEvents.tick(event => {
 
     bpSaveState(p, state.tag, state)
 
-    if (leveledUp) {
-      bpUpdateScore(server, name, state.level)
-      bpNextRewardPreview(server, name, season, state.level)
-    }
+    if (leveledUp) bpNextRewardPreview(server, name, season, state.level)
 
-    var xpIntoLevel = state.seasonXp - state.level * xpPerLevel
-    if (delta > 0 || leveledUp) {
-      bpShowProgressBar(server, name, season.phase, state.level, xpIntoLevel, xpPerLevel)
-      bpBarVisible[name] = true
-    } else if (bpBarVisible[name]) {
-      bpHideProgressBar(server, name)
-      bpBarVisible[name] = false
+    if (delta > 0) {
+      var xpIntoLevel = state.seasonXp - state.level * xpPerLevel
+      bpShowProgress(server, name, season.phase, state.level, xpIntoLevel, xpPerLevel)
     }
   }
 })
