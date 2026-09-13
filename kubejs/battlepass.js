@@ -23,9 +23,7 @@ function bpLog(msg) { console.log(BP_LOG_PREFIX + msg) }
 // items) for the Fluxer + Portal announcements. Keep the season NAMES and
 // the anchor date in sync by hand between the two if you edit the rotation.
 //
-// A season can either be a single theme for its whole 3 months (just set
-// name/emoji/color at the top level), or split into two `phases` (a day
-// range each, via phaseSplitDay) with their own name/emoji/color and:
+// Each season is its own full 3-month theme with name/emoji/color plus:
 //   - `horde` { everyDays, spawnMultiplier } — every `everyDays` in-game
 //     days, every NATURALLY-spawning zombie gets cloned in place
 //     `spawnMultiplier`x (see the EntityEvents.spawned hook below), rather
@@ -38,7 +36,7 @@ function bpLog(msg) { console.log(BP_LOG_PREFIX + msg) }
 //     (renders as snow only in cold biomes, rain elsewhere; vanilla has no
 //     "force snow everywhere" override).
 //   - `decor` { tag, items } — tagged item_display entities scattered near
-//     online players, auto-removed the moment the phase ends. Real block
+//     online players, auto-removed the moment the season ends. Real block
 //     placement was considered and rejected: there's no sandboxed way to
 //     query terrain height from here, and tracking placed block coords in
 //     memory wouldn't survive a restart, so decor uses entities instead,
@@ -51,146 +49,138 @@ var BP =
   "anchorDate": "2026-09-13",
   "seasons": [
     {
-      "name": "Night of the Living Dead → A Very Rad Xmas",
-      "phaseSplitDay": 48,
-      "phases": [
-        {
-          "key": "halloween",
-          "name": "Night of the Living Dead",
-          "emoji": "🎃",
-          "color": "gold",
-          "horde": { "everyDays": 7, "spawnMultiplier": 12 },
-          "decor": {
-            "tag": "bp_halloween_decor",
-            "items": ["minecraft:carved_pumpkin", "minecraft:jack_o_lantern", "minecraft:pumpkin"]
-          },
-          "firstLogin": {
-            "message": "Welcome to Night of the Living Dead! Here's a bounty to get you started.",
-            "give": [
-              "give {player} minecraft:diamond 5",
-              "give {player} minecraft:netherite_scrap 2",
-              "give {player} minecraft:golden_apple 8",
-              "give {player} minecraft:experience_bottle 20",
-              "give {player} minecraft:iron_ingot 16"
-            ]
-          },
-          "daily": [
-            ["give {player} minecraft:bread 8", "give {player} minecraft:cooked_chicken 4"],
-            ["give {player} minecraft:pumpkin_pie 4", "give {player} minecraft:sweet_berries 8"],
-            ["give {player} minecraft:coal 16", "give {player} minecraft:apple 6"],
-            ["give {player} minecraft:iron_ingot 4", "give {player} minecraft:experience_bottle 3"],
-            ["give {player} minecraft:cooked_beef 6", "give {player} minecraft:honey_bottle 2"],
-            ["give {player} minecraft:cookie 12"],
-            ["give {player} minecraft:baked_potato 8", "give {player} minecraft:experience_bottle 2"]
-          ],
-          "levels": {
-            "1": ["give {player} minecraft:cooked_chicken 8"],
-            "2": ["give {player} minecraft:pumpkin_pie 4"],
-            "3": ["give {player} minecraft:coal 16"],
-            "4": ["give {player} minecraft:iron_ingot 8"],
-            "5": ["give {player} minecraft:sweet_berries 16"],
-            "6": ["give {player} minecraft:bread 16"],
-            "7": ["give {player} minecraft:cooked_beef 8"],
-            "8": ["give {player} minecraft:iron_ingot 16", "give {player} minecraft:experience_bottle 5"],
-            "9": ["give {player} minecraft:gold_ingot 8"],
-            "10": ["give {player} minecraft:redstone 32"],
-            "11": ["give {player} minecraft:lapis_lazuli 16"],
-            "12": ["give {player} minecraft:cooked_porkchop 16", "give {player} minecraft:honey_bottle 4"],
-            "13": ["give {player} minecraft:diamond 2"],
-            "14": ["give {player} minecraft:emerald 8"],
-            "15": ["give {player} minecraft:ender_pearl 8"],
-            "16": ["give {player} minecraft:gold_block 2"],
-            "17": ["give {player} minecraft:diamond 4"],
-            "18": ["give {player} minecraft:amethyst_shard 8"],
-            "19": ["give {player} minecraft:blaze_rod 8"],
-            "20": ["give {player} minecraft:diamond_block 1"],
-            "21": ["give {player} minecraft:netherite_scrap 2"],
-            "22": ["give {player} minecraft:enchanted_book{StoredEnchantments:[{id:\"minecraft:mending\",lvl:1}]} 1"],
-            "23": ["give {player} minecraft:totem_of_undying 1"],
-            "24": ["give {player} minecraft:netherite_ingot 1"],
-            "25": ["give {player} minecraft:diamond_helmet{Enchantments:[{id:\"minecraft:protection\",lvl:2}]} 1"],
-            "26": ["give {player} minecraft:diamond_chestplate{Enchantments:[{id:\"minecraft:protection\",lvl:2}]} 1"],
-            "27": ["give {player} minecraft:diamond_leggings{Enchantments:[{id:\"minecraft:protection\",lvl:2}]} 1"],
-            "28": ["give {player} minecraft:diamond_boots{Enchantments:[{id:\"minecraft:protection\",lvl:2}]} 1"],
-            "29": ["give {player} minecraft:elytra 1"],
-            "30": [
-              "give {player} minecraft:netherite_ingot 4",
-              "give {player} minecraft:diamond 8",
-              "give {player} minecraft:totem_of_undying 2",
-              "give {player} minecraft:enchanted_golden_apple 2",
-              "give {player} minecraft:nether_star 1"
-            ]
-          }
-        },
-        {
-          "key": "xmas",
-          "name": "A Very Rad Xmas",
-          "emoji": "🎄",
-          "color": "green",
-          "snow": { "everyDays": 3, "durationTicks": 6000 },
-          "decor": {
-            "tag": "bp_xmas_decor",
-            "items": ["minecraft:spruce_sapling", "minecraft:red_shulker_box", "minecraft:lime_shulker_box", "minecraft:snow_block"]
-          },
-          "firstLogin": {
-            "message": "A Very Rad Xmas has begun! Here's a gift to get you started.",
-            "give": [
-              "give {player} minecraft:diamond 5",
-              "give {player} minecraft:netherite_scrap 2",
-              "give {player} minecraft:cake 2",
-              "give {player} minecraft:experience_bottle 20",
-              "give {player} minecraft:iron_ingot 16"
-            ]
-          },
-          "daily": [
-            ["give {player} minecraft:cookie 12", "give {player} minecraft:bread 8"],
-            ["give {player} minecraft:apple 8", "give {player} minecraft:cooked_beef 4"],
-            ["give {player} minecraft:coal 16", "give {player} minecraft:experience_bottle 3"],
-            ["give {player} minecraft:iron_ingot 4", "give {player} minecraft:sweet_berries 8"],
-            ["give {player} minecraft:cooked_porkchop 6", "give {player} minecraft:honey_bottle 2"],
-            ["give {player} minecraft:pumpkin_pie 4"],
-            ["give {player} minecraft:baked_potato 8", "give {player} minecraft:experience_bottle 2"]
-          ],
-          "levels": {
-            "1": ["give {player} minecraft:cookie 12"],
-            "2": ["give {player} minecraft:cake 1"],
-            "3": ["give {player} minecraft:coal 16"],
-            "4": ["give {player} minecraft:iron_ingot 8"],
-            "5": ["give {player} minecraft:sweet_berries 16"],
-            "6": ["give {player} minecraft:bread 16"],
-            "7": ["give {player} minecraft:cooked_beef 8"],
-            "8": ["give {player} minecraft:iron_ingot 16", "give {player} minecraft:experience_bottle 5"],
-            "9": ["give {player} minecraft:gold_ingot 8"],
-            "10": ["give {player} minecraft:redstone 32"],
-            "11": ["give {player} minecraft:lapis_lazuli 16"],
-            "12": ["give {player} minecraft:cooked_porkchop 16", "give {player} minecraft:honey_bottle 4"],
-            "13": ["give {player} minecraft:diamond 2"],
-            "14": ["give {player} minecraft:emerald 8"],
-            "15": ["give {player} minecraft:ender_pearl 8"],
-            "16": ["give {player} minecraft:gold_block 2"],
-            "17": ["give {player} minecraft:diamond 4"],
-            "18": ["give {player} minecraft:amethyst_shard 8"],
-            "19": ["give {player} minecraft:blue_ice 16"],
-            "20": ["give {player} minecraft:diamond_block 1"],
-            "21": ["give {player} minecraft:netherite_scrap 2"],
-            "22": ["give {player} minecraft:enchanted_book{StoredEnchantments:[{id:\"minecraft:mending\",lvl:1}]} 1"],
-            "23": ["give {player} minecraft:totem_of_undying 1"],
-            "24": ["give {player} minecraft:netherite_ingot 1"],
-            "25": ["give {player} minecraft:diamond_helmet{Enchantments:[{id:\"minecraft:protection\",lvl:2}]} 1"],
-            "26": ["give {player} minecraft:diamond_chestplate{Enchantments:[{id:\"minecraft:protection\",lvl:2}]} 1"],
-            "27": ["give {player} minecraft:diamond_leggings{Enchantments:[{id:\"minecraft:protection\",lvl:2}]} 1"],
-            "28": ["give {player} minecraft:diamond_boots{Enchantments:[{id:\"minecraft:protection\",lvl:2}]} 1"],
-            "29": ["give {player} minecraft:elytra 1"],
-            "30": [
-              "give {player} minecraft:netherite_ingot 4",
-              "give {player} minecraft:diamond 8",
-              "give {player} minecraft:totem_of_undying 2",
-              "give {player} minecraft:enchanted_golden_apple 2",
-              "give {player} minecraft:nether_star 1"
-            ]
-          }
-        }
-      ]
+      "name": "Night of the Living Dead",
+      "emoji": "🎃",
+      "color": "gold",
+      "horde": { "everyDays": 7, "spawnMultiplier": 12 },
+      "decor": {
+        "tag": "bp_halloween_decor",
+        "items": ["minecraft:carved_pumpkin", "minecraft:jack_o_lantern", "minecraft:pumpkin"]
+      },
+      "firstLogin": {
+        "message": "Welcome to Night of the Living Dead! Here's a bounty to get you started.",
+        "give": [
+          "give {player} minecraft:diamond 5",
+          "give {player} minecraft:netherite_scrap 2",
+          "give {player} minecraft:golden_apple 8",
+          "give {player} minecraft:experience_bottle 20",
+          "give {player} minecraft:iron_ingot 16"
+        ]
+      },
+      "daily": [
+        ["give {player} minecraft:bread 8", "give {player} minecraft:cooked_chicken 4"],
+        ["give {player} minecraft:pumpkin_pie 4", "give {player} minecraft:sweet_berries 8"],
+        ["give {player} minecraft:coal 16", "give {player} minecraft:apple 6"],
+        ["give {player} minecraft:iron_ingot 4", "give {player} minecraft:experience_bottle 3"],
+        ["give {player} minecraft:cooked_beef 6", "give {player} minecraft:honey_bottle 2"],
+        ["give {player} minecraft:cookie 12"],
+        ["give {player} minecraft:baked_potato 8", "give {player} minecraft:experience_bottle 2"]
+      ],
+      "levels": {
+        "1": ["give {player} minecraft:cooked_chicken 8"],
+        "2": ["give {player} minecraft:pumpkin_pie 4"],
+        "3": ["give {player} minecraft:coal 16"],
+        "4": ["give {player} minecraft:iron_ingot 8"],
+        "5": ["give {player} minecraft:sweet_berries 16"],
+        "6": ["give {player} minecraft:bread 16"],
+        "7": ["give {player} minecraft:cooked_beef 8"],
+        "8": ["give {player} minecraft:iron_ingot 16", "give {player} minecraft:experience_bottle 5"],
+        "9": ["give {player} minecraft:gold_ingot 8"],
+        "10": ["give {player} minecraft:redstone 32"],
+        "11": ["give {player} minecraft:lapis_lazuli 16"],
+        "12": ["give {player} minecraft:cooked_porkchop 16", "give {player} minecraft:honey_bottle 4"],
+        "13": ["give {player} minecraft:diamond 2"],
+        "14": ["give {player} minecraft:emerald 8"],
+        "15": ["give {player} minecraft:ender_pearl 8"],
+        "16": ["give {player} minecraft:gold_block 2"],
+        "17": ["give {player} minecraft:diamond 4"],
+        "18": ["give {player} minecraft:amethyst_shard 8"],
+        "19": ["give {player} minecraft:blaze_rod 8"],
+        "20": ["give {player} minecraft:diamond_block 1"],
+        "21": ["give {player} minecraft:netherite_scrap 2"],
+        "22": ["give {player} minecraft:enchanted_book{StoredEnchantments:[{id:\"minecraft:mending\",lvl:1}]} 1"],
+        "23": ["give {player} minecraft:totem_of_undying 1"],
+        "24": ["give {player} minecraft:netherite_ingot 1"],
+        "25": ["give {player} minecraft:diamond_helmet{Enchantments:[{id:\"minecraft:protection\",lvl:2}]} 1"],
+        "26": ["give {player} minecraft:diamond_chestplate{Enchantments:[{id:\"minecraft:protection\",lvl:2}]} 1"],
+        "27": ["give {player} minecraft:diamond_leggings{Enchantments:[{id:\"minecraft:protection\",lvl:2}]} 1"],
+        "28": ["give {player} minecraft:diamond_boots{Enchantments:[{id:\"minecraft:protection\",lvl:2}]} 1"],
+        "29": ["give {player} minecraft:elytra 1"],
+        "30": [
+          "give {player} minecraft:netherite_ingot 4",
+          "give {player} minecraft:diamond 8",
+          "give {player} minecraft:totem_of_undying 2",
+          "give {player} minecraft:enchanted_golden_apple 2",
+          "give {player} minecraft:nether_star 1"
+        ]
+      }
+    },
+    {
+      "name": "A Very Rad Xmas",
+      "emoji": "🎄",
+      "color": "green",
+      "snow": { "everyDays": 3, "durationTicks": 6000 },
+      "decor": {
+        "tag": "bp_xmas_decor",
+        "items": ["minecraft:spruce_sapling", "minecraft:red_shulker_box", "minecraft:lime_shulker_box", "minecraft:snow_block"]
+      },
+      "firstLogin": {
+        "message": "A Very Rad Xmas has begun! Here's a gift to get you started.",
+        "give": [
+          "give {player} minecraft:diamond 5",
+          "give {player} minecraft:netherite_scrap 2",
+          "give {player} minecraft:cake 2",
+          "give {player} minecraft:experience_bottle 20",
+          "give {player} minecraft:iron_ingot 16"
+        ]
+      },
+      "daily": [
+        ["give {player} minecraft:cookie 12", "give {player} minecraft:bread 8"],
+        ["give {player} minecraft:apple 8", "give {player} minecraft:cooked_beef 4"],
+        ["give {player} minecraft:coal 16", "give {player} minecraft:experience_bottle 3"],
+        ["give {player} minecraft:iron_ingot 4", "give {player} minecraft:sweet_berries 8"],
+        ["give {player} minecraft:cooked_porkchop 6", "give {player} minecraft:honey_bottle 2"],
+        ["give {player} minecraft:pumpkin_pie 4"],
+        ["give {player} minecraft:baked_potato 8", "give {player} minecraft:experience_bottle 2"]
+      ],
+      "levels": {
+        "1": ["give {player} minecraft:cookie 12"],
+        "2": ["give {player} minecraft:cake 1"],
+        "3": ["give {player} minecraft:coal 16"],
+        "4": ["give {player} minecraft:iron_ingot 8"],
+        "5": ["give {player} minecraft:sweet_berries 16"],
+        "6": ["give {player} minecraft:bread 16"],
+        "7": ["give {player} minecraft:cooked_beef 8"],
+        "8": ["give {player} minecraft:iron_ingot 16", "give {player} minecraft:experience_bottle 5"],
+        "9": ["give {player} minecraft:gold_ingot 8"],
+        "10": ["give {player} minecraft:redstone 32"],
+        "11": ["give {player} minecraft:lapis_lazuli 16"],
+        "12": ["give {player} minecraft:cooked_porkchop 16", "give {player} minecraft:honey_bottle 4"],
+        "13": ["give {player} minecraft:diamond 2"],
+        "14": ["give {player} minecraft:emerald 8"],
+        "15": ["give {player} minecraft:ender_pearl 8"],
+        "16": ["give {player} minecraft:gold_block 2"],
+        "17": ["give {player} minecraft:diamond 4"],
+        "18": ["give {player} minecraft:amethyst_shard 8"],
+        "19": ["give {player} minecraft:blue_ice 16"],
+        "20": ["give {player} minecraft:diamond_block 1"],
+        "21": ["give {player} minecraft:netherite_scrap 2"],
+        "22": ["give {player} minecraft:enchanted_book{StoredEnchantments:[{id:\"minecraft:mending\",lvl:1}]} 1"],
+        "23": ["give {player} minecraft:totem_of_undying 1"],
+        "24": ["give {player} minecraft:netherite_ingot 1"],
+        "25": ["give {player} minecraft:diamond_helmet{Enchantments:[{id:\"minecraft:protection\",lvl:2}]} 1"],
+        "26": ["give {player} minecraft:diamond_chestplate{Enchantments:[{id:\"minecraft:protection\",lvl:2}]} 1"],
+        "27": ["give {player} minecraft:diamond_leggings{Enchantments:[{id:\"minecraft:protection\",lvl:2}]} 1"],
+        "28": ["give {player} minecraft:diamond_boots{Enchantments:[{id:\"minecraft:protection\",lvl:2}]} 1"],
+        "29": ["give {player} minecraft:elytra 1"],
+        "30": [
+          "give {player} minecraft:netherite_ingot 4",
+          "give {player} minecraft:diamond 8",
+          "give {player} minecraft:totem_of_undying 2",
+          "give {player} minecraft:enchanted_golden_apple 2",
+          "give {player} minecraft:nether_star 1"
+        ]
+      }
     },
     {
       "placeholder": true,
@@ -298,7 +288,7 @@ var BP =
 }
 
 
-// ── season + phase math ─────────────────────────────────────────────────────
+// ── season math ──────────────────────────────────────────────────────────
 // seasonNumber counts up forever from the anchor date (never resets), so the
 // same rotation slot years apart is still treated as a fresh season.
 function bpMonthsBetween(a, b) {
@@ -308,15 +298,6 @@ function bpAddMonths(d, n) {
   var r = new Date(d.getTime())
   r.setMonth(r.getMonth() + n)
   return r
-}
-function bpResolvePhase(def, dayOfSeason) {
-  if (def.phases && def.phases.length) {
-    var idx = 0
-    if (def.phaseSplitDay != null && dayOfSeason >= def.phaseSplitDay) idx = 1
-    if (idx >= def.phases.length) idx = def.phases.length - 1
-    return { key: def.phases[idx].key || ('p' + idx), def: def.phases[idx] }
-  }
-  return { key: 'single', def: def } // unsplit season: the season-level fields ARE the phase's
 }
 function bpCurrentSeason() {
   if (!BP) return null
@@ -330,7 +311,6 @@ function bpCurrentSeason() {
   var startDate = bpAddMonths(anchor, seasonNumber * 3)
   var endDate = bpAddMonths(anchor, (seasonNumber + 1) * 3)
   var dayOfSeason = Math.floor((now.getTime() - startDate.getTime()) / 86400000)
-  var phase = bpResolvePhase(def, dayOfSeason)
   return {
     key: 'S' + seasonNumber,
     seasonNumber: seasonNumber,
@@ -338,8 +318,6 @@ function bpCurrentSeason() {
     startDate: startDate,
     endDate: endDate,
     dayOfSeason: dayOfSeason,
-    phase: phase,
-    phaseGlobalKey: 'S' + seasonNumber + ':' + phase.key,
   }
 }
 
@@ -360,15 +338,11 @@ function bpReadTotalXp(p) {
 }
 
 // ── persistent per-player state (survives relog + restarts) ────────────────
-// Scoped to the PHASE, not the season — each phase (Night of the Living
-// Dead, A Very Rad Xmas, ...) is its own independent mini-battlepass with
-// its own first-login bonus and 1-30 level track, so state resets the
-// moment phaseGlobalKey changes, same as a season rollover used to.
 function bpGetState(p) {
   var tag = p.persistentData.getCompound('battlepass')
   return {
     tag: tag,
-    phaseKey: tag.getString('phaseKey'),
+    seasonKey: tag.getString('seasonKey'),
     seasonXp: tag.getInt('seasonXp'),
     level: tag.getInt('level'),
     lastDailyDay: tag.contains('lastDailyDay') ? tag.getInt('lastDailyDay') : -999999,
@@ -376,7 +350,7 @@ function bpGetState(p) {
   }
 }
 function bpSaveState(p, tag, state) {
-  tag.putString('phaseKey', state.phaseKey)
+  tag.putString('seasonKey', state.seasonKey)
   tag.putInt('seasonXp', state.seasonXp)
   tag.putInt('level', state.level)
   tag.putInt('lastDailyDay', state.lastDailyDay)
@@ -406,19 +380,19 @@ function bpProgressBarText(pct, width) {
   for (var i = 0; i < width; i++) bar += i < filled ? '▓' : '░'
   return bar
 }
-function bpShowProgress(server, playerName, phase, level, xpIntoLevel, xpPerLevel) {
+function bpShowProgress(server, playerName, def, level, xpIntoLevel, xpPerLevel) {
   var pct = Math.max(0, Math.min(1, xpIntoLevel / xpPerLevel))
   var bar = bpProgressBarText(pct, 20)
-  var text = phase.def.emoji + ' Lv.' + level + ' ' + bar + ' ' + xpIntoLevel + '/' + xpPerLevel
+  var text = def.emoji + ' Lv.' + level + ' ' + bar + ' ' + xpIntoLevel + '/' + xpPerLevel
   try { server.runCommandSilent('title ' + playerName + ' actionbar {"text":"' + text + '"}') }
   catch (e) { bpLog('actionbar progress failed: ' + e) }
 }
 
 function bpAnnounceLevelUp(server, p, playerName, season, newLevel) {
-  var phase = season.phase
+  var def = season.def
   try {
-    server.runCommandSilent('title ' + playerName + ' title {"text":"' + phase.def.emoji + ' Battlepass Level ' + newLevel + '!","color":"' + phase.def.color + '"}')
-    server.runCommandSilent('title ' + playerName + ' subtitle {"text":"' + phase.def.name + '"}')
+    server.runCommandSilent('title ' + playerName + ' title {"text":"' + def.emoji + ' Battlepass Level ' + newLevel + '!","color":"' + def.color + '"}')
+    server.runCommandSilent('title ' + playerName + ' subtitle {"text":"' + def.name + '"}')
     server.runCommandSilent('playsound minecraft:entity.player.levelup player ' + playerName)
   } catch (e) { bpLog('level-up announce failed: ' + e) }
 }
@@ -434,7 +408,7 @@ function bpParseGiveItem(cmd) {
 }
 function bpNextRewardPreview(server, playerName, season, level) {
   if (level >= BP.levelsPerSeason) return
-  var cmds = season.phase.def.levels[String(level + 1)]
+  var cmds = season.def.levels[String(level + 1)]
   if (!cmds || !cmds.length) return
   var item = bpParseGiveItem(cmds[0])
   if (!item) return
@@ -457,7 +431,7 @@ var bpLastHordeWarnDay = -1
 var bpLastHordeAnnounceDay = -1
 var bpHordeActiveDay = -1 // dayOfSeason for which the spawn-amplifier is live; -1 = off
 function bpCheckHorde(server, season) {
-  var horde = season.phase.def.horde
+  var horde = season.def.horde
   var d = season.dayOfSeason
 
   if (!horde) { bpHordeActiveDay = -1; return }
@@ -501,7 +475,7 @@ EntityEvents.spawned(event => {
 
   var season = bpCurrentSeason()
   if (!season || season.dayOfSeason !== bpHordeActiveDay) return
-  var horde = season.phase.def.horde
+  var horde = season.def.horde
   if (!horde) return
   var extra = (horde.spawnMultiplier || 1) - 1
   if (extra <= 0) return
@@ -522,7 +496,7 @@ EntityEvents.spawned(event => {
 // biome temperature) ─────────────────────────────────────────────────────────
 var bpLastSnowDay = -1
 function bpCheckSnow(server, season) {
-  var snow = season.phase.def.snow
+  var snow = season.def.snow
   if (!snow) return
   var d = season.dayOfSeason
   if (d % snow.everyDays !== 0 || bpLastSnowDay === d) return
@@ -534,23 +508,22 @@ function bpCheckSnow(server, season) {
 }
 
 // ── decor: tagged item_display entities near online players, swapped out the
-// moment the phase changes (covers phase-within-season AND season rollover,
-// since both change phaseGlobalKey) ─────────────────────────────────────────
-var bpDecorActiveGlobalKey = null
+// moment the season changes ─────────────────────────────────────────────────
+var bpDecorActiveKey = null
 var bpDecorActiveTag = null
 var bpDecorPlaced = false
 function bpSyncDecor(server, season) {
-  var decor = season.phase.def.decor
+  var decor = season.def.decor
   var newTag = decor ? decor.tag : null
 
-  if (bpDecorActiveGlobalKey !== season.phaseGlobalKey) {
+  if (bpDecorActiveKey !== season.key) {
     if (bpDecorActiveTag) {
       try {
         server.runCommandSilent('kill @e[type=minecraft:item_display,tag=' + bpDecorActiveTag + ']')
         bpLog('cleared decor tag ' + bpDecorActiveTag)
       } catch (e) { bpLog('decor cleanup failed: ' + e) }
     }
-    bpDecorActiveGlobalKey = season.phaseGlobalKey
+    bpDecorActiveKey = season.key
     bpDecorActiveTag = newTag
     bpDecorPlaced = false
   }
@@ -572,12 +545,10 @@ function bpSyncDecor(server, season) {
     }
   }
   bpDecorPlaced = true
-  bpLog('placed decor for ' + season.phaseGlobalKey)
+  bpLog('placed decor for ' + season.key)
 }
 
-// ── login: phase rollover, first-login bonus, daily reward ─────────────────
-// Each phase is its own mini-battlepass, so "new phase" (not just "new
-// season") triggers a fresh first-login bonus and a reset 1-30 level track.
+// ── login: season rollover, first-login bonus, daily reward ────────────────
 PlayerEvents.loggedIn(event => {
   var season = bpCurrentSeason()
   if (!season) return
@@ -586,24 +557,24 @@ PlayerEvents.loggedIn(event => {
   var server = event.server
 
   var state = bpGetState(p)
-  var isNewPhaseForPlayer = state.phaseKey !== season.phaseGlobalKey
+  var isNewSeasonForPlayer = state.seasonKey !== season.key
 
-  if (isNewPhaseForPlayer) {
-    state.phaseKey = season.phaseGlobalKey
+  if (isNewSeasonForPlayer) {
+    state.seasonKey = season.key
     state.seasonXp = 0
     state.level = 0
     state.lastDailyDay = -999999
     state.lastKnownTotalXp = bpReadTotalXp(p)
-    bpRunGive(server, name, season.phase.def.firstLogin.give)
+    bpRunGive(server, name, season.def.firstLogin.give)
     try {
-      server.runCommandSilent('title ' + name + ' title {"text":"' + season.phase.def.emoji + ' ' + season.phase.def.name + '","color":"' + season.phase.def.color + '"}')
-      p.tell('§6[Battlepass] §f' + season.phase.def.firstLogin.message)
+      server.runCommandSilent('title ' + name + ' title {"text":"' + season.def.emoji + ' ' + season.def.name + '","color":"' + season.def.color + '"}')
+      p.tell('§6[Battlepass] §f' + season.def.firstLogin.message)
     } catch (e) { bpLog('first-login announce failed: ' + e) }
-    bpLog(name + ' started phase ' + season.phaseGlobalKey)
+    bpLog(name + ' started season ' + season.key + ' (' + season.def.name + ')')
   }
 
   if (state.lastDailyDay !== season.dayOfSeason) {
-    var pool = season.phase.def.daily
+    var pool = season.def.daily
     var pick = pool[((season.dayOfSeason % pool.length) + pool.length) % pool.length]
     bpRunGive(server, name, pick)
     state.lastDailyDay = season.dayOfSeason
@@ -615,7 +586,7 @@ PlayerEvents.loggedIn(event => {
   try {
     var xpPerLevel = BP.xpPerLevel
     var needed = xpPerLevel - (state.seasonXp % xpPerLevel)
-    p.tell('§6[Battlepass] §f' + season.phase.def.name + ' — Level ' + state.level + '/' + BP.levelsPerSeason +
+    p.tell('§6[Battlepass] §f' + season.def.name + ' — Level ' + state.level + '/' + BP.levelsPerSeason +
       ' (' + needed + ' XP to next level)')
   } catch (e) {}
   bpNextRewardPreview(server, name, season, state.level)
@@ -642,7 +613,7 @@ ServerEvents.tick(event => {
     var p = onlinePlayers[i]
     var name = bpPlayerName(p)
     var state = bpGetState(p)
-    if (state.phaseKey !== season.phaseGlobalKey) continue // handled on next login
+    if (state.seasonKey !== season.key) continue // handled on next login
 
     var curXp = bpReadTotalXp(p)
     if (state.lastKnownTotalXp < 0) state.lastKnownTotalXp = curXp
@@ -656,7 +627,7 @@ ServerEvents.tick(event => {
     while (state.level < maxLevel && state.seasonXp >= (state.level + 1) * xpPerLevel) {
       state.level = state.level + 1
       leveledUp = true
-      var rewards = season.phase.def.levels[String(state.level)]
+      var rewards = season.def.levels[String(state.level)]
       bpRunGive(server, name, rewards)
       bpAnnounceLevelUp(server, p, name, season, state.level)
     }
@@ -667,7 +638,7 @@ ServerEvents.tick(event => {
 
     if (delta > 0) {
       var xpIntoLevel = state.seasonXp - state.level * xpPerLevel
-      bpShowProgress(server, name, season.phase, state.level, xpIntoLevel, xpPerLevel)
+      bpShowProgress(server, name, season.def, state.level, xpIntoLevel, xpPerLevel)
     }
   }
 })

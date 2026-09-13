@@ -14,7 +14,7 @@ function fluxerEmbed(season) {
         '',
         `${LEVELS_PER_SEASON} levels — level up by earning XP in-game (mining, fighting, smelting, anything that gives you XP).`,
         `Log in for the first time this season for a big bonus, then every day for a smaller one.`,
-        `Check your progress in-game — it's on the sidebar, and you'll get a title pop-up on every level-up.`,
+        `Progress shows in chat and as a brief on-screen readout when you gain XP — no permanent HUD.`,
       ].join('\n'),
       color: def.color,
       footer: { text: `Runs ${fmtDate(startDate)} → ${fmtDate(endDate)}` },
