@@ -53,10 +53,6 @@ var BP =
       "emoji": "🎃",
       "color": "gold",
       "horde": { "everyDays": 7, "spawnMultiplier": 12 },
-      "decor": {
-        "tag": "bp_halloween_decor",
-        "items": ["minecraft:carved_pumpkin", "minecraft:jack_o_lantern", "minecraft:pumpkin"]
-      },
       "firstLogin": {
         "message": "Welcome to Night of the Living Dead! Here's a bounty to get you started.",
         "give": [
