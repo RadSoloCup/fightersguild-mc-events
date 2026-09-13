@@ -22,13 +22,34 @@ it in place to change rewards.
   and shows a title pop-up.
 - **First login of the season**: a big one-time bonus.
 - **Every day logged in**: a smaller bonus (cycles through a themed pool).
-- **Visible in-game**: a scoreboard sidebar objective (`bp_level`) is always
-  shown; login and level-up both post a chat/title message.
+- **Visible in-game, without a permanent HUD**: level shows in the **tab
+  player list** (`scoreboard ... setdisplay list`, not `sidebar`), and a
+  boss-bar progress meter only appears for ~5-10s right after an XP gain or
+  level-up, then auto-hides. Leveling up also shows a hoverable "Next
+  unlock: [item]" chat line — hovering renders Minecraft's real item-icon
+  tooltip, the closest vanilla gets to a preview image without a resource
+  pack or a custom GUI mod.
 - **Season rotation**: 3-month cycles from a fixed anchor date, through a
-  4-theme rotation (Halloween→Christmas, New Year→Valentine's,
-  Easter→Summer, Summer→Back to School). The season number counts up
-  forever from the anchor, so the same rotation slot a year later is still a
-  fresh season for reward-reset purposes.
+  4-theme rotation. The season number counts up forever from the anchor, so
+  the same rotation slot a year later is still a fresh season for
+  reward-reset purposes.
+- **Sub-phases within a season**: season 0 splits at day 48 into two named,
+  independently-themed halves —
+  - 🎃 **Night of the Living Dead** (Halloween): a zombie horde spawns near
+    every online player every 7 in-game days, with a title-card warning the
+    day before; pumpkins/jack-o-lanterns are scattered near online players.
+  - 🎄 **A Very Rad Xmas**: periodic snow-rendering weather every few
+    in-game days (vanilla weather has no "force snow" override — it renders
+    as snow only in cold biomes, rain elsewhere); xmas-themed decor
+    scattered near online players.
+  
+  Decor is spawned as tagged `item_display` entities, not real placed
+  blocks — there's no sandboxed way for KubeJS to query terrain height here,
+  and an in-memory placed-block list wouldn't survive a restart. Entities
+  side-step both problems: they persist correctly through restarts and are
+  removed with one tagged `/kill`, so they can never touch (or accidentally
+  destroy) an actual player build. All of it disappears the moment the
+  phase ends.
 - 20-40 configurable levels (currently 30) — food/materials early, high-end
   armor and rare materials (diamonds, netherite, totems, elytra) at the top.
 
