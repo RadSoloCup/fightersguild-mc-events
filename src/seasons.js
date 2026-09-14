@@ -6,11 +6,11 @@
 // if you add/reorder a season here, do the same there.
 //
 // Halloween and Christmas are two separate, sequential, full 3-month
-// seasons (NOT sub-phases of one season) — Night of the Living Dead runs
-// the entire first season (2026-09-13 -> 2026-12-13), then A Very Rad Xmas
-// is its own season right after (2026-12-13 -> 2027-03-13).
+// seasons (NOT sub-phases of one season). Trick or Trainer runs the entire
+// first season (2026-09-13 -> 2026-12-13), then A Very Rad Xmas is its own
+// season right after (2026-12-13 -> 2027-03-13).
 export const ROTATION = [
-  { name: 'Night of the Living Dead', theme: 'Halloween zombie hordes & pumpkins', emoji: '🎃', color: 0xff7518 },
+  { name: 'Trick or Trainer', theme: 'Halloween zombie hordes & Pixelmon rewards', emoji: '🎃', color: 0xff7518 },
   { name: 'A Very Rad Xmas', theme: 'Snowy Christmas decor & weather', emoji: '🎄', color: 0x2ecc71 },
   { name: "New Year's Frost", theme: "New Year → Valentine's", emoji: '❄️', color: 0x4fc3f7 },
   { name: 'Bloom & Renewal', theme: 'Easter → Summer', emoji: '🌸', color: 0xe685d6 },

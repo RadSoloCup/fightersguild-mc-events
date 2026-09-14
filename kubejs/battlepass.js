@@ -49,65 +49,64 @@ var BP =
   "anchorDate": "2026-09-13",
   "seasons": [
     {
-      "name": "Night of the Living Dead",
+      "name": "Trick or Trainer",
       "emoji": "🎃",
       "color": "gold",
       "horde": { "everyDays": 7, "spawnMultiplier": 12 },
       "firstLogin": {
-        "message": "Welcome to Night of the Living Dead! Here's a bounty to get you started.",
+        "message": "Welcome to Trick or Trainer! Here's a bounty to get you started.",
         "give": [
-          "give {player} minecraft:diamond 5",
-          "give {player} minecraft:netherite_scrap 2",
-          "give {player} minecraft:golden_apple 8",
-          "give {player} minecraft:experience_bottle 20",
-          "give {player} minecraft:iron_ingot 16"
+          "give {player} pixelmon:poke_ball 10",
+          "give {player} pixelmon:great_ball 5",
+          "give {player} pixelmon:full_restore 3",
+          "give {player} pixelmon:rare_candy 5",
+          "give {player} pixelmon:potion 10"
         ]
       },
       "daily": [
-        ["give {player} minecraft:bread 8", "give {player} minecraft:cooked_chicken 4"],
-        ["give {player} minecraft:pumpkin_pie 4", "give {player} minecraft:sweet_berries 8"],
-        ["give {player} minecraft:coal 16", "give {player} minecraft:apple 6"],
-        ["give {player} minecraft:iron_ingot 4", "give {player} minecraft:experience_bottle 3"],
-        ["give {player} minecraft:cooked_beef 6", "give {player} minecraft:honey_bottle 2"],
-        ["give {player} minecraft:cookie 12"],
-        ["give {player} minecraft:baked_potato 8", "give {player} minecraft:experience_bottle 2"]
+        ["give {player} pixelmon:poke_ball 5", "give {player} pixelmon:potion 5"],
+        ["give {player} pixelmon:great_ball 3", "give {player} pixelmon:super_potion 5"],
+        ["give {player} pixelmon:rare_candy 2", "give {player} pixelmon:revive 2"],
+        ["give {player} pixelmon:ultra_ball 2", "give {player} pixelmon:full_heal 3"],
+        ["give {player} pixelmon:hyper_potion 3"],
+        ["give {player} pixelmon:rare_candy 3"],
+        ["give {player} pixelmon:great_ball 5", "give {player} pixelmon:max_potion 2"]
       ],
       "levels": {
-        "1": ["give {player} minecraft:cooked_chicken 8"],
-        "2": ["give {player} minecraft:pumpkin_pie 4"],
-        "3": ["give {player} minecraft:coal 16"],
-        "4": ["give {player} minecraft:iron_ingot 8"],
-        "5": ["give {player} minecraft:sweet_berries 16"],
-        "6": ["give {player} minecraft:bread 16"],
-        "7": ["give {player} minecraft:cooked_beef 8"],
-        "8": ["give {player} minecraft:iron_ingot 16", "give {player} minecraft:experience_bottle 5"],
-        "9": ["give {player} minecraft:gold_ingot 8"],
-        "10": ["give {player} minecraft:redstone 32"],
-        "11": ["give {player} minecraft:lapis_lazuli 16"],
-        "12": ["give {player} minecraft:cooked_porkchop 16", "give {player} minecraft:honey_bottle 4"],
-        "13": ["give {player} minecraft:diamond 2"],
-        "14": ["give {player} minecraft:emerald 8"],
-        "15": ["give {player} minecraft:ender_pearl 8"],
-        "16": ["give {player} minecraft:gold_block 2"],
-        "17": ["give {player} minecraft:diamond 4"],
-        "18": ["give {player} minecraft:amethyst_shard 8"],
-        "19": ["give {player} minecraft:blaze_rod 8"],
-        "20": ["give {player} minecraft:diamond_block 1"],
-        "21": ["give {player} minecraft:netherite_scrap 2"],
-        "22": ["give {player} minecraft:enchanted_book{StoredEnchantments:[{id:\"minecraft:mending\",lvl:1}]} 1"],
-        "23": ["give {player} minecraft:totem_of_undying 1"],
-        "24": ["give {player} minecraft:netherite_ingot 1"],
-        "25": ["give {player} minecraft:diamond_helmet{Enchantments:[{id:\"minecraft:protection\",lvl:2}]} 1"],
-        "26": ["give {player} minecraft:diamond_chestplate{Enchantments:[{id:\"minecraft:protection\",lvl:2}]} 1"],
-        "27": ["give {player} minecraft:diamond_leggings{Enchantments:[{id:\"minecraft:protection\",lvl:2}]} 1"],
-        "28": ["give {player} minecraft:diamond_boots{Enchantments:[{id:\"minecraft:protection\",lvl:2}]} 1"],
-        "29": ["give {player} minecraft:elytra 1"],
+        "1": ["give {player} pixelmon:poke_ball 10"],
+        "2": ["give {player} pixelmon:potion 10"],
+        "3": ["give {player} pixelmon:great_ball 5"],
+        "4": ["give {player} pixelmon:rare_candy 3"],
+        "5": ["give {player} pixelmon:super_potion 8"],
+        "6": ["give {player} pixelmon:full_heal 5"],
+        "7": ["give {player} pixelmon:ultra_ball 5"],
+        "8": ["give {player} pixelmon:rare_candy 5", "give {player} pixelmon:revive 3"],
+        "9": ["give {player} pixelmon:exp_share 1"],
+        "10": ["give {player} pixelmon:hyper_potion 5"],
+        "11": ["give {player} pixelmon:fire_stone 1"],
+        "12": ["give {player} pixelmon:water_stone 1"],
+        "13": ["give {player} pixelmon:rare_candy 8"],
+        "14": ["give {player} pixelmon:thunder_stone 1"],
+        "15": ["give {player} pixelmon:leaf_stone 1"],
+        "16": ["give {player} pixelmon:max_potion 5"],
+        "17": ["give {player} pixelmon:rare_candy 10"],
+        "18": ["give {player} pixelmon:moon_stone 1"],
+        "19": ["give {player} pixelmon:max_revive 3"],
+        "20": ["give {player} pixelmon:ability_capsule 1"],
+        "21": ["give {player} pixelmon:full_restore 5"],
+        "22": ["give {player} pixelmon:destiny_knot 1"],
+        "23": ["give {player} pixelmon:everstone 2"],
+        "24": ["give {player} pixelmon:choice_band 1"],
+        "25": ["give {player} pixelmon:life_orb 1"],
+        "26": ["give {player} pixelmon:leftovers 1"],
+        "27": ["give {player} pixelmon:pp_up 3"],
+        "28": ["give {player} pixelmon:rare_candy 16"],
+        "29": ["give {player} pixelmon:ultra_ball 10"],
         "30": [
-          "give {player} minecraft:netherite_ingot 4",
-          "give {player} minecraft:diamond 8",
-          "give {player} minecraft:totem_of_undying 2",
-          "give {player} minecraft:enchanted_golden_apple 2",
-          "give {player} minecraft:nether_star 1"
+          "give {player} pixelmon:master_ball 2",
+          "give {player} pixelmon:rare_candy 32",
+          "give {player} pixelmon:full_restore 5",
+          "give {player} pixelmon:pp_up 5"
         ]
       }
     },
@@ -398,7 +397,7 @@ function bpAnnounceLevelUp(server, p, playerName, season, newLevel) {
 // tooltip; there's no way to show an arbitrary image without a resource pack
 // or a custom GUI mod) ───────────────────────────────────────────────────────
 function bpParseGiveItem(cmd) {
-  var m = cmd.match(/give \{player\}\s+(minecraft:[a-z_]+)(?:\{[\s\S]*\})?\s+(\d+)/)
+  var m = cmd.match(/give \{player\}\s+([a-z_]+:[a-z_]+)(?:\{[\s\S]*\})?\s+(\d+)/)
   if (!m) return null
   return { id: m[1], count: Number(m[2]) }
 }
@@ -408,7 +407,7 @@ function bpNextRewardPreview(server, playerName, season, level) {
   if (!cmds || !cmds.length) return
   var item = bpParseGiveItem(cmds[0])
   if (!item) return
-  var label = item.id.replace('minecraft:', '').replace(/_/g, ' ') + (item.count > 1 ? ' x' + item.count : '')
+  var label = item.id.replace(/^[a-z_]+:/, '').replace(/_/g, ' ') + (item.count > 1 ? ' x' + item.count : '')
   var json = [
     { text: 'Next unlock (Lv.' + (level + 1) + '): ' },
     { text: '[' + label + ']', color: 'yellow', hoverEvent: { action: 'show_item', contents: { id: item.id, count: item.count } } },

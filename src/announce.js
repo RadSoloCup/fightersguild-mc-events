@@ -12,9 +12,9 @@ function fluxerEmbed(season) {
       description: [
         `**${def.theme}**`,
         '',
-        `${LEVELS_PER_SEASON} levels — level up by earning XP in-game (mining, fighting, smelting, anything that gives you XP).`,
+        `${LEVELS_PER_SEASON} levels, unlocked by earning XP in-game (mining, fighting, smelting, anything that gives you XP).`,
         `Log in for the first time this season for a big bonus, then every day for a smaller one.`,
-        `Progress shows in chat and as a brief on-screen readout when you gain XP — no permanent HUD.`,
+        `Progress shows in chat and as a brief on-screen readout when you gain XP, no permanent HUD.`,
       ].join('\n'),
       color: def.color,
       footer: { text: `Runs ${fmtDate(startDate)} → ${fmtDate(endDate)}` },
@@ -31,7 +31,7 @@ function portalEventBody(season) {
     '',
     `- First login this season: a big bonus`,
     `- Every day you log in: a smaller bonus`,
-    `- Every level: a themed reward — food and materials early on, high-end armor and rare materials at the top`,
+    `- Every level: a themed reward, from basic Poke Balls early on up to Master Balls and rare candy at the top`,
     '',
     `Runs ${fmtDate(startDate)} through ${fmtDate(endDate)}.`,
   ].join('\n')
